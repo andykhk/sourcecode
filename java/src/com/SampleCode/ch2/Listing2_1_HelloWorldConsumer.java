@@ -1,8 +1,11 @@
 package com.SampleCode.ch2;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
+import com.SampleCode.util.LocalConnFactory;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -21,12 +24,7 @@ public class Listing2_1_HelloWorldConsumer {
 	public static void main(String[] args) {
 
 
-		//Var declaration 
-		String host = "127.0.0.1";
-		int port = 5672;
-		String username = "guest";
-		String password = "guest";
-
+		
 		//Exchange config
 		String exName = "Hello-exchange";
 		String exType = "direct";
@@ -43,13 +41,10 @@ public class Listing2_1_HelloWorldConsumer {
 
 
 		//Construct a factory upon above parameters
-		ConnectionFactory factory = new ConnectionFactory ();
+		LocalConnFactory factory = new LocalConnFactory();
 
-		factory.setHost(host);
-		factory.setPort(port);
-		factory.setUsername(username);
-		factory.setPassword(password);
-
+		//ExecutorService es = Executors.newSingleThreadExecutor();
+		//try(Connection conn = factory.newConnection(es);
 		try(Connection conn = factory.newConnection();
 			Channel ch = conn.createChannel();) {
 
@@ -65,7 +60,20 @@ public class Listing2_1_HelloWorldConsumer {
 					ch.queueBind(qName, exName, routing_key);
 					
 					System.out.println(" - All thing set (Start to consume!)");
-					ch.basicConsume(qName, new BasicConsumer(ch));
+					
+					BasicConsumer consumer = new BasicConsumer(ch);
+					for (int i=0 ; i<100 ; i++) {
+						System.out.println("Consumer loop[" + (i+1) + "]");
+						ch.basicConsume(qName, consumer);
+					
+					try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							System.err.println("Thread sleep error");
+						}
+						
+					}
+					
 					
 				}else {
 					System.err.println("Error, queue[" + qName + "] can't not be create!");

@@ -3,6 +3,7 @@ package com.SampleCode.ch2;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import com.SampleCode.util.LocalConnFactory;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.AMQP.Queue;
@@ -26,12 +27,7 @@ public class Listing2_1_HelloWorldProducer {
 	
 	public static void main(String[] args) {
 		
-		//Var declaration 
-		String host = "127.0.0.1";
-		int port = 5672;
-		String username = "guest";
-		String password = "guest";
-		
+	
 		//Exchange config
 		String exName = "Hello-exchange";
 		String exType = "direct";
@@ -47,13 +43,8 @@ public class Listing2_1_HelloWorldProducer {
 				.build();
 		
 		//Construct a factory upon above parameters
-		ConnectionFactory factory = new ConnectionFactory ();
-		
-		factory.setHost(host);
-		factory.setPort(port);
-		factory.setUsername(username);
-		factory.setPassword(password);
-		
+		LocalConnFactory factory = new LocalConnFactory();
+	
 		try(Connection conn = factory.newConnection();
 			/*
 			 * No com.rabbitmq.client.AMQP,
@@ -74,7 +65,10 @@ public class Listing2_1_HelloWorldProducer {
 					ch.queueBind(qName, exName, routing_key);
 					//Unlike python, properties can set upon publish time
 					System.out.println(" - Everything set");
-					ch.basicPublish(exName, routing_key, properties, payload.getBytes());
+					for (int i=0 ; i<50 ; i++) {
+						ch.basicPublish(exName, routing_key, properties, (payload + "[" + i +  "]") .getBytes());
+					}
+				
 					System.out.println(" - Publish msg: " + payload);	
 				}	
 			}else {

@@ -3,6 +3,7 @@ package com.SampleCode.ch2;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import com.SampleCode.util.LocalConnFactory;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.AMQP.Queue;
@@ -26,12 +27,6 @@ public class Listing2_3_HelloWorldProducerWithConfirm {
 	
 	public static void main(String[] args) {
 		
-		//Var declaration 
-		String host = "127.0.0.1";
-		int port = 5672;
-		String username = "guest";
-		String password = "guest";
-		
 		//Exchange config
 		String exName = "Hello-exchange";
 		String exType = "direct";
@@ -47,12 +42,7 @@ public class Listing2_3_HelloWorldProducerWithConfirm {
 				.build();
 		
 		//Construct a factory upon above parameters
-		ConnectionFactory factory = new ConnectionFactory ();
-		
-		factory.setHost(host);
-		factory.setPort(port);
-		factory.setUsername(username);
-		factory.setPassword(password);
+		LocalConnFactory factory = new LocalConnFactory();
 		
 		try(Connection conn = factory.newConnection();
 			/*
@@ -63,28 +53,22 @@ public class Listing2_3_HelloWorldProducerWithConfirm {
 			Channel ch = conn.createChannel();) {
 			
 			//Passive == internal???
-			DeclareOk declareOk = ch.exchangeDeclare(exName, exType, true, false, false, null);
-			
-			
-			if(declareOk != null) {
-				
+			if(ch.exchangeDeclare(exName, exType, true, false, false, null) != null) {
 				//Bind to queue "hello-queue" if want to let helloWorldConsumer to be workable.
-				Queue.DeclareOk declareQ = ch.queueDeclare(qName, true, false, true, null);
-				if (declareQ != null) {
-					ch.queueBind(qName, exName, routing_key);
-					
-					
-					//Confirm listener
-					ch.addConfirmListener(new BasicConfirmListener());
-					//Enable confirm support
-					ch.confirmSelect();
-					/**
-					 * However in automatic mode, all msg would be consider send out succcessfully 
-					 * after basicPublish (No checking). 
-					 */
-					ch.basicPublish(exName, routing_key, properties, payload.getBytes());
-					
-					System.out.println(" - Publish msg: " + payload);	
+				if (ch.queueDeclare(qName, true, false, true, null) != null) {
+					if (ch.queueBind(qName, exName, routing_key) != null ) {
+						//Confirm listener
+						ch.addConfirmListener(new BasicConfirmListener());
+						//Enable confirm support
+						ch.confirmSelect();
+						/**
+						 * However in automatic mode, all msg would be consider send out succcessfully 
+						 * after basicPublish (No checking). 
+						 */
+						ch.basicPublish(exName, routing_key, properties, payload.getBytes());
+
+						System.out.println(" - Publish msg: " + payload);	
+					}else {System.err.println("Queue bind erroe!"); }
 				}	
 			}else {
 				System.err.println("Error, can't declare exchange <Hello-exchange>!");

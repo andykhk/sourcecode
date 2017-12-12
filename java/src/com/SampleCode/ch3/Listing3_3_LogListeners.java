@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import com.SampleCode.ch2.Listing2_1_HelloWorldConsumer;
+import com.SampleCode.util.LocalConnFactory;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -25,17 +26,12 @@ public class Listing3_3_LogListeners {
 		String ExType = "topic";
 		
 		
-		ConnectionFactory fact = new ConnectionFactory ();
-		fact.setHost("127.0.0.1");
-		fact.setPort(5672);
-		fact.setUsername("guest");
-		fact.setPassword("guest");
+		ConnectionFactory fact = new LocalConnFactory();
+
 
 		try(Connection conn = fact.newConnection();
 				Channel ch = conn.createChannel();) {
-			
-			DeclareOk declare = ch.exchangeDeclare(ExName, ExType, true, false, true, null);
-			if (declare != null) {
+			if (ch.exchangeDeclare(ExName, ExType, true, false, true, null) != null) {
 				
 				/*
 				 * Declare three queues  (Error || Warning || Info),
@@ -81,9 +77,7 @@ public class Listing3_3_LogListeners {
 				
 				
 			}
-			
-		
-			
+	
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (TimeoutException e) {
