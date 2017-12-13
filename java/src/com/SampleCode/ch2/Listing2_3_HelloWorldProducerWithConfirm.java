@@ -66,13 +66,19 @@ public class Listing2_3_HelloWorldProducerWithConfirm {
 						 * after basicPublish (No checking). 
 						 */
 						ch.basicPublish(exName, routing_key, properties, payload.getBytes());
-
 						System.out.println(" - Publish msg: " + payload);	
+						//ConfirmListener take time to react which is a separate thread, so 
+						//put main thread on sleep for 5s in order to wait. 
+						try {
+							Thread.sleep(5000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}						
+						
 					}else {System.err.println("Queue bind erroe!"); }
-				}	
-			}else {
-				System.err.println("Error, can't declare exchange <Hello-exchange>!");
-			}
+				}else {System.err.println("Queue declare error!");}	
+			}else {System.err.println("Error, can't declare exchange <Hello-exchange>!");}
 			
 			
 			

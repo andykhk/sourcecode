@@ -13,6 +13,11 @@ import com.rabbitmq.client.ConnectionFactory;
  * 
  *  - rabbitmqctl add_user alert_user alertme
  *  - rabbitmqctl set_permissions alert_user ".*" ".*" ".*"
+ *  
+ *  
+ *  This piece of code used to demonstrate how routing key can be used to filter || route the 
+ *  msg, as you see critical.* || *.rate_limit are set for routing, all msg which dun meet 
+ *  the routing key woudl be simply ignored.
  * @author andykwok
  *
  */
@@ -34,8 +39,7 @@ public class Listing4_1_2Alert {
 				Channel ch = conn.createChannel();) {
 
 			//Declare Exchange
-			DeclareOk declare = ch.exchangeDeclare(ExName, ExType);
-			if (declare !=null) {
+			if ( ch.exchangeDeclare(ExName, ExType) !=null) {
 				/**
 				 * Listing 4.2
 				 */
@@ -73,7 +77,6 @@ public class Listing4_1_2Alert {
 				 * for try-with-resources and trigger connection to close, which is not 
 				 * it suppose to be. 
 				 */
-
 
 				System.out.println("Start consume!");
 

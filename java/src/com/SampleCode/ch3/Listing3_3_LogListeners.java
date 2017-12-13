@@ -13,6 +13,11 @@ import com.rabbitmq.client.AMQP.Exchange.DeclareOk;
 /**
  * Java version of Listing3.3 example (Log Listeners)
  * 
+ * As you may notice queue name is not specified at all, in this case server-side would
+ * automatically generate a random name zip it along with the DeclareOK object when 
+ * ch.queueDecalre( ) is called. As the queue name is generated randomly which intend 
+ * to be disposable and one time use -only. Which are exclusive / auto-delete / non durable
+ * 
  * P.54
  * @author andykwok
  *
@@ -31,6 +36,7 @@ public class Listing3_3_LogListeners {
 
 		try(Connection conn = fact.newConnection();
 				Channel ch = conn.createChannel();) {
+			
 			if (ch.exchangeDeclare(ExName, ExType, true, false, true, null) != null) {
 				
 				/*
@@ -57,12 +63,10 @@ public class Listing3_3_LogListeners {
 					ch.basicPublish("", QnameInfo , null, ("Hello world[" + i + "]").getBytes());
 				}
 				
-				
 				//Wait till all msg send out 
 				try {
-					Thread.sleep(5000);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				

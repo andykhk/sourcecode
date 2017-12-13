@@ -1,7 +1,5 @@
 package com.SampleCode.ch4.alertService;
 
-import java.io.IOException;
-
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
@@ -34,8 +32,6 @@ public class NotifyConsumer extends DefaultConsumer{
 			
 			System.out.println ("Send alert via e-mail! Alert Text: " + message + 
 								"\nRecipients: " + recips + "\n");
-			long deliveryTag = envelope.getDeliveryTag();
-			getChannel().basicAck(deliveryTag, false);
 		}catch (Exception ex) {
 			System.err.println("Exception happen on HandleDelivery!");
 		}

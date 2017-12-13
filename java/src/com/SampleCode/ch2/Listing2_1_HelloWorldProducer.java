@@ -52,37 +52,27 @@ public class Listing2_1_HelloWorldProducer {
 			 * But com.rabbitmq.client.Channel
 			 */
 			Channel ch = conn.createChannel();) {
-			
+
 			//Passive == internal???
-			DeclareOk declareOk = ch.exchangeDeclare(exName, exType, true, false, false, null);
-			
-			
-			if(declareOk != null) {
-				
+			if(ch.exchangeDeclare(exName, exType, true, false, false, null) != null) {
 				//Bind to queue "hello-queue" if want to let helloWorldConsumer to be workable.
-				Queue.DeclareOk declareQ = ch.queueDeclare(qName, true, false, true, null);
-				if (declareQ != null) {
-					ch.queueBind(qName, exName, routing_key);
-					//Unlike python, properties can set upon publish time
-					System.out.println(" - Everything set");
-					for (int i=0 ; i<50 ; i++) {
-						ch.basicPublish(exName, routing_key, properties, (payload + "[" + i +  "]") .getBytes());
-					}
-				
-					System.out.println(" - Publish msg: " + payload);	
-				}	
-			}else {
-				System.err.println("Error, can't declare exchange <Hello-exchange>!");
-			}
-			
-			
-			
-		} catch (IOException | TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		
+				if (ch.queueDeclare(qName, true, false, true, null) != null) {
+					if (ch.queueBind(qName, exName, routing_key) != null ) {
+						
+						System.out.println(" - Everything set, start to consume once per second for 50 times: ");
+						for (int i=0 ; i<50 ; i++) {
+							try {
+								Thread.sleep(1000);
+								ch.basicPublish(exName, routing_key, properties, (payload + "[" + i +  "]") .getBytes());
+								System.out.println(" - Publish msg: " + payload  + "[" + i +  "]");	
+							} catch (InterruptedException e) {e.printStackTrace();}
+						}	
+					}else {System.err.println("Queue declare Error!"); }
+				}else {System.err.println("Declare Queue error!");}
+			}else {System.err.println("Error, can't declare exchange <Hello-exchange>!");}
+		} catch (IOException | TimeoutException e) {System.err.println("Exception happen, triggered autocloseable bye~");}
+
+
 	}
 	
 	

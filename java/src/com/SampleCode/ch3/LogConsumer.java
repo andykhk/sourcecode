@@ -7,6 +7,13 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
+
+
+/**
+ * Custom consumer which print out the msg content while received.
+ * @author andykwok
+ *
+ */
 public class LogConsumer extends DefaultConsumer {
 
 	String level;
